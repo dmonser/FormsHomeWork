@@ -1,17 +1,17 @@
 package ru.netology;
 
+import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Request {
     private final String method;
     private final String path;
     private final String[] parts;
-    private final Map<String, String> queryParams;
+    private final List<NameValuePair> queryParams;
 
     public String[] getParts() {
         return parts;
@@ -38,27 +38,25 @@ public class Request {
 
         method = parts[0];
     }
-
-    public Map<String, String> parseQuery (String queryString) {
-        String[] params = queryString.split("&");
-        Map<String, String> map = new HashMap<>();
-        for (String param : params) {
-            String name = param.split("=")[0];
-            String value = param.split("=")[1];
-            map.put(name, value);
-        }
-        return map;
+    public List<NameValuePair> parseQuery (String queryString) {
+        return URLEncodedUtils.parse(path, StandardCharsets.UTF_8);
     }
 
-    public String getQueryParam(String name) {
-        if (queryParams.containsKey(name)) {
-            return queryParams.get(name);
+    public List<String> getQueryParams() {
+        List<String> params = new ArrayList<>();
+        for(NameValuePair pair : queryParams) {
+            params.add(pair.getValue());
         }
-
-        return "Parameter " + name + " not found!";
+        return params;
     }
 
-    public Map<String, String> getQueryParams() {
-        return queryParams;
+    public List<String> getQueryParam(String name) {
+        List<String> params = new ArrayList<>();
+        for(NameValuePair pair : queryParams) {
+            if (pair.getName().equals(name)) {
+                params.add(pair.getValue());
+            }
+        }
+        return params;
     }
 }
